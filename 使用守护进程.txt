@@ -1,0 +1,30 @@
+使用 Supervisor 守护进程：Supervisor 可以监控 Laravel 的队列 Worker 进程，并在需要时重新启动它们。首先，确保安装了 Supervisor。
+
+bash
+复制代码
+sudo apt-get install supervisor   # 示例中使用 Ubuntu 的安装命令，其他系统请适配
+创建 Supervisor 配置文件：创建一个配置文件来监控 Laravel 的队列 Worker 进程。
+
+ini
+复制代码
+; /etc/supervisor/conf.d/laravel-worker.conf
+
+[program:laravel-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /path/to/artisan queue:work --queue=high,default --sleep=3 --tries=3
+autostart=true
+autorestart=true
+user=www-data    ; 运行 Laravel 的用户
+numprocs=8       ; 可以根据需要设置多个进程
+redirect_stderr=true
+stdout_logfile=/path/to/your/logs/worker.log
+command 部分根据你的项目路径和需求修改。
+numprocs 可以根据需要设置多个进程来处理队列任务。
+更新 Supervisor 并启动进程：
+
+bash
+复制代码
+supervisorctl reread
+supervisorctl update
+supervisorctl start laravel-worker:*
+
